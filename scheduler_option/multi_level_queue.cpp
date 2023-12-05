@@ -12,7 +12,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
-#define PROCESS_NUM 10
+#define PROCESS_NUM 5
 #define QUANTUM 20 // time quantum (20ms) setting for RR scheduling
 using namespace std;
 
@@ -36,8 +36,8 @@ typedef struct pcb
 // MSG structer
 typedef struct msg
 {
-    long msgtype;
-    PCB pcb; // Message data(PCB) to push in queue
+    long msgtype; // Message type, must be > 0 with 'long' data type
+    PCB pcb;      // Message data(PCB) to push in queue
 } MSG;
 
 int main()
@@ -57,7 +57,7 @@ int main()
         pid_t forkProcess = fork(); // fork child process
 
         child[i].pid = forkProcess;
-        child[i].cpu_burst = rand() % 20 + 1;
+        child[i].cpu_burst = rand() % 20 + 1; // for process CPU burst: 1 ~ 20
 
         /// if interactive process
         if (interactive[i] == true)
@@ -144,7 +144,7 @@ int main()
     }
 
     // schedule log file open
-    FILE *fp = fopen("Multi_level_schedule_dump.txt", "w"); // write mode (or append mode)
+    FILE *fp = fopen("Multi_level_Queue_schedule_dump.txt", "w"); // write mode (or append mode)
 
     // Create QUEUEs
     queue<long> RR_Queue;   /// QUEUE 1 as Round Robin (RR)
@@ -413,12 +413,20 @@ int main()
         maxWaitingtime = max(maxWaitingtime, completion_time[i] - burst_time[i]);
     }
 
-    // Average Completion time
+    // Min, Max, Average Completion time
+    printf(">> Min Completion Time : %.2f\n", minCompletiontime);
+    printf(">> MAX Completion Time : %.2f\n", maxCompletiontime);
     printf(">> Average Completion Time : %.2f\n\n", sumofCompletiontime / PROCESS_NUM);
+    fprintf(fp, ">> Min Completion Time : %.2f\n", minCompletiontime);
+    fprintf(fp, ">> MAX Completion Time : %.2f\n", maxCompletiontime);
     fprintf(fp, ">> Average Completion Time : %.2f\n\n", sumofCompletiontime / PROCESS_NUM);
 
-    // Average Waiting time
+    // Min, Max, Average Waiting time
+    printf(">> Min Waiting Time : %.2f\n", minWaitingtime);
+    printf(">> MAX Waiting Time : %.2f\n", maxWaitingtime);
     printf(">> Average Waiting Time : %.2f\n\n", sumofWaitingtime / PROCESS_NUM);
+    fprintf(fp, ">> Min Waiting Time : %.2f\n", minWaitingtime);
+    fprintf(fp, ">> MAX Waiting Time : %.2f\n", maxWaitingtime);
     fprintf(fp, ">> Average Waiting Time : %.2f\n\n", sumofWaitingtime / PROCESS_NUM);
 
     fclose(fp);
