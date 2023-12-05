@@ -1,0 +1,123 @@
+
+[Run Status Process ENQUEUE]
+
+PID: 	17127
+Arrival Order: 	1
+Burst Time: 	4.00
+
+Priority: 	2
+
+PID: 	17128
+Arrival Order: 	2
+Burst Time: 	7.00
+
+Priority: 	2
+
+PID: 	17129
+Arrival Order: 	3
+Burst Time: 	18.00
+
+Priority: 	2
+
+PID: 	17130
+Arrival Order: 	4
+Burst Time: 	16.00
+
+Priority: 	1
+
+PID: 	17131
+Arrival Order: 	5
+Burst Time: 	14.00
+
+Priority: 	1
+
+PID: 	17132
+Arrival Order: 	6
+Burst Time: 	16.00
+
+Priority: 	2
+
+PID: 	17133
+Arrival Order: 	7
+Burst Time: 	7.00
+
+Priority: 	2
+
+PID: 	17134
+Arrival Order: 	8
+Burst Time: 	13.00
+
+Priority: 	2
+
+PID: 	17135
+Arrival Order: 	9
+Burst Time: 	10.00
+
+Priority: 	2
+
+PID: 	17136
+Arrival Order: 	10
+Burst Time: 	2.00
+
+Priority: 	2
+
+
+[Process Execution Flow]
+
+>>> Context Switch #1 -> Running Process: P1 - PID[17127] - Burst time[4.00]
+
+>>> Context Switch #2 -> Running Process: P2 - PID[17128] - Burst time[7.00]
+
+>>> Context Switch #3 -> Running Process: P3 - PID[17129] - Burst time[18.00]
+
+>>> Context Switch #4 -> Running Process: P4 - PID[17130] - Burst time[16.00]
+
+>>> Context Switch #5 -> Running Process: P5 - PID[17131] - Burst time[14.00]
+
+>>> Context Switch #6 -> Running Process: P6 - PID[17132] - Burst time[16.00]
+
+>>> Context Switch #7 -> Running Process: P7 - PID[17133] - Burst time[7.00]
+
+>>> Context Switch #8 -> Running Process: P8 - PID[17134] - Burst time[13.00]
+
+>>> Context Switch #9 -> Running Process: P9 - PID[17135] - Burst time[10.00]
+
+>>> Context Switch #10 -> Running Process: P10 - PID[17136] - Burst time[2.00]
+
+>>> Context Switch #11 -> Running Process: P1 - PID[17127] - Burst time[4.00]
+
+>>> Context Switch #12 -> Running Process: P2 - PID[17128] - Burst time[7.00]
+
+>>> Context Switch #13 -> Running Process: P3 - PID[17129] - Burst time[18.00]
+
+RUN QUEUE Empty!
+
+
+[Multi-level Queue Scheduler]
+
+PID		Burst Time	Completion Time		Waiting Time	Priority
+
+17127		4.00		82.00			78.00			2
+
+17128		7.00		89.00			82.00			2
+
+17129		18.00		107.00			89.00			2
+
+17130		16.00		16.00			0.00			1
+
+17131		14.00		30.00			16.00			1
+
+17132		16.00		46.00			30.00			2
+
+17133		7.00		53.00			46.00			2
+
+17134		13.00		66.00			53.00			2
+
+17135		10.00		76.00			66.00			2
+
+17136		2.00		78.00			76.00			2
+
+>> Average Completion Time : 64.30
+
+>> Average Waiting Time : 53.60
+
