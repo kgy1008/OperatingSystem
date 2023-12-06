@@ -213,22 +213,20 @@ int main() {
                         io_queue.push_back(run);
                     }
 
-                    // Decrease I/O Burst value & Print Wait Queue
-                    printf(" I/O Queue: ");
-                    fprintf(fp, " I/O Queue: ");
-
-                    for (long &i : io_queue) {                        
-                        printf("P%ld ", i + 1);
-                        fprintf(fp, "P%ld ", i + 1);
-                    }
-
                     for (auto it = io_queue.begin(); it != io_queue.end();) {
                         child[*it].io_burst -= QUANTUM;
+                        printf(" I/O Queue: ");
+                        fprintf(fp, " I/O Queue: ");
+
+                        for (long &i : io_queue) {
+                            printf("P%ld ", i + 1);
+                            fprintf(fp, "P%ld ", i + 1);
+                        }
 
                         if (child[*it].io_burst <= 0) {
                             child[*it].io_burst = 0;
-                            printf("\n ***** [%d] I/O burst reaches to zero, end process. *****", child[*it].pid);
-                            fprintf(fp, "\n ***** [%d] I/O burst reaches to zero, end process. *****", child[*it].pid);
+                            printf("\n ***** [%d] I/O burst reaches to zero, end process. *****\n", child[*it].pid);
+                            fprintf(fp, "\n ***** [%d] I/O burst reaches to zero, end process. *****\n", child[*it].pid);
                             it = io_queue.erase(it);
                         } else {
                             ++it;
@@ -267,17 +265,23 @@ int main() {
 
     // Calculating Min, Max, Sum of Waiting and Completion time
     for (int i = 0; i < PROCESS_NUM; i++) {
-        printf("%d\t\t%.2lf\t\t%.2lf\t\t\t%.2lf\n\n", child[i].pid, burst_time[i], completion_time[i], completion_time[i] - burst_time[i]);
-        fprintf(fp, "%d\t\t%.2lf\t\t%.2lf\t\t\t%.2lf\n\n", child[i].pid, burst_time[i], completion_time[i], completion_time[i] - burst_time[i]);
+        float waiting_time = completion_time[i] - burst_time[i];
+        if (waiting_time < 0) {
+            burst_time[i] = completion_time[i];
+            waiting_time = 0;
+        }
+
+        printf("%d\t\t%.2lf\t\t%.2lf\t\t\t%.2lf\n\n", child[i].pid, burst_time[i], completion_time[i], waiting_time);
+        fprintf(fp, "%d\t\t%.2lf\t\t%.2lf\t\t\t%.2lf\n\n", child[i].pid, burst_time[i], completion_time[i], waiting_time);
 
         sumofCompletiontime += completion_time[i];
-        sumofWaitingtime += (completion_time[i] - burst_time[i]);
+        sumofWaitingtime += waiting_time;
 
         minCompletiontime = min(minCompletiontime, completion_time[i]);
         maxCompletiontime = max(maxCompletiontime, completion_time[i]);
 
-        minWaitingtime = min(minWaitingtime, completion_time[i] - burst_time[i]);
-        maxWaitingtime = max(maxWaitingtime, completion_time[i] - burst_time[i]);
+        minWaitingtime = min(minWaitingtime, waiting_time);
+        maxWaitingtime = max(maxWaitingtime, waiting_time);
     }
 
     // Min, Max, Average Completion time
