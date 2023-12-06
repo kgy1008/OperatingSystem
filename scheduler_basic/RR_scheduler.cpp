@@ -57,8 +57,8 @@ int main() {
         pid_t forkProcess = fork();  // fork child process
 
         child[i].pid = forkProcess;
-        child[i].cpu_burst = rand() % 20 + 10;  
-        child[i].io_burst = rand() % 20 + 1;   
+        child[i].cpu_burst = rand() % 30 + 10;
+        child[i].io_burst = rand() % 20 + 1;
 
         if (forkProcess == 0) {  // if Child Process!
 
@@ -120,8 +120,8 @@ int main() {
     FILE *fp = fopen("schedule_dump.txt", "w");  // write mode (or append mode)
 
     // Create QUEUE
-    queue<long> readyQueue;  // Run QUEUE
-    queue<long> io_queue;    // I/O QUEUE
+    std::deque<long> readyQueue;  // Run QUEUE
+    std::deque<long> io_queue;    // I/O QUEUE
 
     float burst_time[PROCESS_NUM];
     float IO_burst_time[PROCESS_NUM];
@@ -131,7 +131,7 @@ int main() {
     printf("\n[Run Status Process ENQUEUE]\n\n");
     fprintf(fp, "\n[Run Status Process ENQUEUE]\n\n");
     for (int i = 0; i < PROCESS_NUM; i++) {
-        readyQueue.push(i);  // ENQUEUE
+        readyQueue.push_back(i);  // ENQUEUE
 
         printf("< Process #%d | PID: %d >\n", i + 1, child[i].pid);
         printf("CPU Burst Time:    %.2lf\n", child[i].cpu_burst);
@@ -168,10 +168,25 @@ int main() {
 
         long run = readyQueue.front();  // run status process
 
-        readyQueue.pop();  // readyQueue DEQUEUE
+        readyQueue.pop_front();  // readyQueue DEQUEUE
 
-        printf("Running Process: P%ld - PID[%d] - Remaining CPU Burst time[%.2lf] - Remaining I/O Burst time[%.2lf]\n\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
-        fprintf(fp, "Running Process: P%ld - PID[%d] - Remaining CPU Burst time[%.2lf] - Remaining I/O Burst time[%.2lf]\n\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
+        printf("Running Process: P%ld - PID[%d] - Remaining CPU Burst time[%.2lf] - Remaining I/O Burst time[%.2lf]", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
+        fprintf(fp, "Running Process: P%ld - PID[%d] - Remaining CPU Burst time[%.2lf] - Remaining I/O Burst time[%.2lf]", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
+
+        printf("\nReady Queue: ");
+        fprintf(fp, "\nReady Queue: ");
+        for (long &i : readyQueue) {
+            printf("P%ld ", i + 1);
+            fprintf(fp, "P%ld ", i + 1);
+        }
+
+        printf("\nI/O Queue: ");
+        fprintf(fp, "\nI/O Queue: ");
+        for (long &i : readyQueue) {
+            fprintf(fp, "P%ld ", i + 1);
+        }
+        printf("\n");
+        fprintf(fp, "\n");
 
         msg.msgtype = child[run].pid;  // msgtype: Child PID
 
@@ -183,7 +198,7 @@ int main() {
             // if burst time remaining, enqueue
             if (msg.pcb.flag == true) {
                 if (child[run].cpu_burst > 0) {
-                    readyQueue.push(run);
+                    readyQueue.push_back(run);
                     child[run].cpu_burst -= QUANTUM;
                     turnaround_time += QUANTUM;
                 }
@@ -197,7 +212,7 @@ int main() {
 
             // if there's an I/O burst, move the process to the I/O queue
             if (child[run].io_burst > 0) {
-                io_queue.push(run);
+                io_queue.push_back(run);
                 child[run].io_burst -= QUANTUM;
                 turnaround_time += QUANTUM;
             }
