@@ -1,43 +1,43 @@
 
 [Run Status Process ENQUEUE]
 
-< Process #1 | PID: 15627 >
+< Process #1 | PID: 12261 >
 I/O Burst Time:    7.00
 I/O Burst Time:    7.00
 
-< Process #2 | PID: 15628 >
+< Process #2 | PID: 12262 >
 I/O Burst Time:    16.00
 I/O Burst Time:    16.00
 
-< Process #3 | PID: 15629 >
+< Process #3 | PID: 12263 >
 I/O Burst Time:    16.00
 I/O Burst Time:    16.00
 
-< Process #4 | PID: 15630 >
+< Process #4 | PID: 12264 >
 I/O Burst Time:    13.00
 I/O Burst Time:    13.00
 
-< Process #5 | PID: 15631 >
+< Process #5 | PID: 12265 >
 I/O Burst Time:    2.00
 I/O Burst Time:    2.00
 
-< Process #6 | PID: 15632 >
+< Process #6 | PID: 12266 >
 I/O Burst Time:    8.00
 I/O Burst Time:    8.00
 
-< Process #7 | PID: 15633 >
+< Process #7 | PID: 12267 >
 I/O Burst Time:    20.00
 I/O Burst Time:    20.00
 
-< Process #8 | PID: 15634 >
+< Process #8 | PID: 12268 >
 I/O Burst Time:    7.00
 I/O Burst Time:    7.00
 
-< Process #9 | PID: 15635 >
+< Process #9 | PID: 12269 >
 I/O Burst Time:    7.00
 I/O Burst Time:    7.00
 
-< Process #10 | PID: 15636 >
+< Process #10 | PID: 12270 >
 I/O Burst Time:    17.00
 I/O Burst Time:    17.00
 
@@ -45,185 +45,114 @@ I/O Burst Time:    17.00
 [Process Execution Flow]
 
 >>> Context Switch #1
- Running Process: P1 - PID[15627] - Remaining CPU Burst time[23.00] - Remaining I/O Burst time[7.00]
+ Ready Queue: P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 
+ Running Process: P1 | PID[12261] | Remaining CPU Burst time[23.00] | Remaining I/O Burst time[7.00]
+ ***** [12261] CPU burst reaches to zero, do I/O. *****
+ I/O Queue: P1 
+ ***** [12261] I/O burst reaches to zero, end process. *****
 
-
-Ready Queue: P2 P3 P4 P5 P6 P7 P8 P9 P10 
-I/O Queue: P2 P3 P4 P5 P6 P7 P8 P9 P10 
 >>> Context Switch #2
- Running Process: P2 - PID[15628] - Remaining CPU Burst time[37.00] - Remaining I/O Burst time[16.00]
+ Ready Queue: P2 P3 P4 P5 P6 P7 P8 P9 P10 
+ Running Process: P2 | PID[12262] | Remaining CPU Burst time[37.00] | Remaining I/O Burst time[16.00]
+ ***** [12262] CPU burst reaches to zero, do I/O. *****
+ I/O Queue: P2 
 
-
-Ready Queue: P3 P4 P5 P6 P7 P8 P9 P10 P1 
-I/O Queue: P3 P4 P5 P6 P7 P8 P9 P10 P1 
 >>> Context Switch #3
- Running Process: P3 - PID[15629] - Remaining CPU Burst time[33.00] - Remaining I/O Burst time[16.00]
+ Ready Queue: P3 P4 P5 P6 P7 P8 P9 P10 
+ Running Process: P3 | PID[12263] | Remaining CPU Burst time[33.00] | Remaining I/O Burst time[16.00]
+ ***** [12263] CPU burst reaches to zero, do I/O. *****
+ I/O Queue: P2 P3 
+ ***** [12262] I/O burst reaches to zero, end process. *****
 
-
-Ready Queue: P4 P5 P6 P7 P8 P9 P10 P1 P2 
-I/O Queue: P4 P5 P6 P7 P8 P9 P10 P1 P2 
 >>> Context Switch #4
- Running Process: P4 - PID[15630] - Remaining CPU Burst time[26.00] - Remaining I/O Burst time[13.00]
+ Ready Queue: P4 P5 P6 P7 P8 P9 P10 
+ Running Process: P4 | PID[12264] | Remaining CPU Burst time[26.00] | Remaining I/O Burst time[13.00]
+ ***** [12264] CPU burst reaches to zero, do I/O. *****
+ I/O Queue: P3 P4 
+ ***** [12263] I/O burst reaches to zero, end process. *****
 
-
-Ready Queue: P5 P6 P7 P8 P9 P10 P1 P2 P3 
-I/O Queue: P5 P6 P7 P8 P9 P10 P1 P2 P3 
 >>> Context Switch #5
- Running Process: P5 - PID[15631] - Remaining CPU Burst time[19.00] - Remaining I/O Burst time[2.00]
+ Ready Queue: P5 P6 P7 P8 P9 P10 
+ Running Process: P5 | PID[12265] | Remaining CPU Burst time[19.00] | Remaining I/O Burst time[2.00]
 
-
-Ready Queue: P6 P7 P8 P9 P10 P1 P2 P3 P4 
-I/O Queue: P6 P7 P8 P9 P10 P1 P2 P3 P4 
 >>> Context Switch #6
- Running Process: P6 - PID[15632] - Remaining CPU Burst time[12.00] - Remaining I/O Burst time[8.00]
+ Ready Queue: P6 P7 P8 P9 P10 P5 
+ Running Process: P6 | PID[12266] | Remaining CPU Burst time[12.00] | Remaining I/O Burst time[8.00]
 
-
-Ready Queue: P7 P8 P9 P10 P1 P2 P3 P4 P5 
-I/O Queue: P7 P8 P9 P10 P1 P2 P3 P4 P5 
 >>> Context Switch #7
- Running Process: P7 - PID[15633] - Remaining CPU Burst time[30.00] - Remaining I/O Burst time[20.00]
+ Ready Queue: P7 P8 P9 P10 P5 P6 
+ Running Process: P7 | PID[12267] | Remaining CPU Burst time[30.00] | Remaining I/O Burst time[20.00]
 
-
-Ready Queue: P8 P9 P10 P1 P2 P3 P4 P5 P6 
-I/O Queue: P8 P9 P10 P1 P2 P3 P4 P5 P6 
 >>> Context Switch #8
- Running Process: P8 - PID[15634] - Remaining CPU Burst time[33.00] - Remaining I/O Burst time[7.00]
+ Ready Queue: P8 P9 P10 P5 P6 P7 
+ Running Process: P8 | PID[12268] | Remaining CPU Burst time[33.00] | Remaining I/O Burst time[7.00]
 
-
-Ready Queue: P9 P10 P1 P2 P3 P4 P5 P6 P7 
-I/O Queue: P9 P10 P1 P2 P3 P4 P5 P6 P7 
 >>> Context Switch #9
- Running Process: P9 - PID[15635] - Remaining CPU Burst time[10.00] - Remaining I/O Burst time[7.00]
+ Ready Queue: P9 P10 P5 P6 P7 P8 
+ Running Process: P9 | PID[12269] | Remaining CPU Burst time[10.00] | Remaining I/O Burst time[7.00]
+ ***** [12269] CPU burst reaches to zero, do I/O. *****
+ I/O Queue: P4 P9 
+ ***** [12264] I/O burst reaches to zero, end process. *****
+ ***** [12269] I/O burst reaches to zero, end process. *****
 
-
-Ready Queue: P10 P1 P2 P3 P4 P5 P6 P7 P8 
-I/O Queue: P10 P1 P2 P3 P4 P5 P6 P7 P8 
 >>> Context Switch #10
- Running Process: P10 - PID[15636] - Remaining CPU Burst time[32.00] - Remaining I/O Burst time[17.00]
+ Ready Queue: P10 P5 P6 P7 P8 
+ Running Process: P10 | PID[12270] | Remaining CPU Burst time[32.00] | Remaining I/O Burst time[17.00]
 
-
-Ready Queue: P1 P2 P3 P4 P5 P6 P7 P8 
-I/O Queue: P1 P2 P3 P4 P5 P6 P7 P8 
 >>> Context Switch #11
- Running Process: P1 - PID[15627] - Remaining CPU Burst time[13.00] - Remaining I/O Burst time[-3.00]
+ Ready Queue: P5 P6 P7 P8 P10 
+ Running Process: P5 | PID[12265] | Remaining CPU Burst time[9.00] | Remaining I/O Burst time[2.00]
+ ***** [12265] CPU burst reaches to zero, do I/O. *****
+ I/O Queue: P5 
+ ***** [12265] I/O burst reaches to zero, end process. *****
 
-
-Ready Queue: P2 P3 P4 P5 P6 P7 P8 P10 
-I/O Queue: P2 P3 P4 P5 P6 P7 P8 P10 
 >>> Context Switch #12
- Running Process: P2 - PID[15628] - Remaining CPU Burst time[27.00] - Remaining I/O Burst time[6.00]
+ Ready Queue: P6 P7 P8 P10 
+ Running Process: P6 | PID[12266] | Remaining CPU Burst time[2.00] | Remaining I/O Burst time[8.00]
+ ***** [12266] CPU burst reaches to zero, do I/O. *****
+ I/O Queue: P6 
+ ***** [12266] I/O burst reaches to zero, end process. *****
 
-
-Ready Queue: P3 P4 P5 P6 P7 P8 P10 P1 
-I/O Queue: P3 P4 P5 P6 P7 P8 P10 P1 
 >>> Context Switch #13
- Running Process: P3 - PID[15629] - Remaining CPU Burst time[23.00] - Remaining I/O Burst time[6.00]
+ Ready Queue: P7 P8 P10 
+ Running Process: P7 | PID[12267] | Remaining CPU Burst time[20.00] | Remaining I/O Burst time[20.00]
 
-
-Ready Queue: P4 P5 P6 P7 P8 P10 P1 P2 
-I/O Queue: P4 P5 P6 P7 P8 P10 P1 P2 
 >>> Context Switch #14
- Running Process: P4 - PID[15630] - Remaining CPU Burst time[16.00] - Remaining I/O Burst time[3.00]
+ Ready Queue: P8 P10 P7 
+ Running Process: P8 | PID[12268] | Remaining CPU Burst time[23.00] | Remaining I/O Burst time[7.00]
 
-
-Ready Queue: P5 P6 P7 P8 P10 P1 P2 P3 
-I/O Queue: P5 P6 P7 P8 P10 P1 P2 P3 
 >>> Context Switch #15
- Running Process: P5 - PID[15631] - Remaining CPU Burst time[9.00] - Remaining I/O Burst time[-8.00]
+ Ready Queue: P10 P7 P8 
+ Running Process: P10 | PID[12270] | Remaining CPU Burst time[22.00] | Remaining I/O Burst time[17.00]
 
-
-Ready Queue: P6 P7 P8 P10 P1 P2 P3 P4 
-I/O Queue: P6 P7 P8 P10 P1 P2 P3 P4 
 >>> Context Switch #16
- Running Process: P6 - PID[15632] - Remaining CPU Burst time[2.00] - Remaining I/O Burst time[-2.00]
+ Ready Queue: P7 P8 P10 
+ Running Process: P7 | PID[12267] | Remaining CPU Burst time[10.00] | Remaining I/O Burst time[20.00]
+ ***** [12267] CPU burst reaches to zero, do I/O. *****
+ I/O Queue: P7 
 
-
-Ready Queue: P7 P8 P10 P1 P2 P3 P4 
-I/O Queue: P7 P8 P10 P1 P2 P3 P4 
 >>> Context Switch #17
- Running Process: P7 - PID[15633] - Remaining CPU Burst time[20.00] - Remaining I/O Burst time[10.00]
+ Ready Queue: P8 P10 
+ Running Process: P8 | PID[12268] | Remaining CPU Burst time[13.00] | Remaining I/O Burst time[7.00]
 
-
-Ready Queue: P8 P10 P1 P2 P3 P4 
-I/O Queue: P8 P10 P1 P2 P3 P4 
 >>> Context Switch #18
- Running Process: P8 - PID[15634] - Remaining CPU Burst time[23.00] - Remaining I/O Burst time[-3.00]
+ Ready Queue: P10 P8 
+ Running Process: P10 | PID[12270] | Remaining CPU Burst time[12.00] | Remaining I/O Burst time[17.00]
 
-
-Ready Queue: P10 P1 P2 P3 P4 P7 
-I/O Queue: P10 P1 P2 P3 P4 P7 
 >>> Context Switch #19
- Running Process: P10 - PID[15636] - Remaining CPU Burst time[22.00] - Remaining I/O Burst time[7.00]
+ Ready Queue: P8 P10 
+ Running Process: P8 | PID[12268] | Remaining CPU Burst time[3.00] | Remaining I/O Burst time[7.00]
+ ***** [12268] CPU burst reaches to zero, do I/O. *****
+ I/O Queue: P7 P8 
+ ***** [12267] I/O burst reaches to zero, end process. *****
+ ***** [12268] I/O burst reaches to zero, end process. *****
 
-
-Ready Queue: P1 P2 P3 P4 P7 P8 
-I/O Queue: P1 P2 P3 P4 P7 P8 
 >>> Context Switch #20
- Running Process: P1 - PID[15627] - Remaining CPU Burst time[3.00] - Remaining I/O Burst time[-3.00]
+ Ready Queue: P10 
+ Running Process: P10 | PID[12270] | Remaining CPU Burst time[2.00] | Remaining I/O Burst time[17.00]
+ ***** [12270] CPU burst reaches to zero, do I/O. *****
+ I/O Queue: P10 
 
-
-Ready Queue: P2 P3 P4 P7 P8 P10 
-I/O Queue: P2 P3 P4 P7 P8 P10 
->>> Context Switch #21
- Running Process: P2 - PID[15628] - Remaining CPU Burst time[17.00] - Remaining I/O Burst time[-4.00]
-
-
-Ready Queue: P3 P4 P7 P8 P10 
-I/O Queue: P3 P4 P7 P8 P10 
->>> Context Switch #22
- Running Process: P3 - PID[15629] - Remaining CPU Burst time[13.00] - Remaining I/O Burst time[-4.00]
-
-
-Ready Queue: P4 P7 P8 P10 P2 
-I/O Queue: P4 P7 P8 P10 P2 
->>> Context Switch #23
- Running Process: P4 - PID[15630] - Remaining CPU Burst time[6.00] - Remaining I/O Burst time[-7.00]
-
-
-Ready Queue: P7 P8 P10 P2 P3 
-I/O Queue: P7 P8 P10 P2 P3 
->>> Context Switch #24
- Running Process: P7 - PID[15633] - Remaining CPU Burst time[10.00] - Remaining I/O Burst time[0.00]
-
-
-Ready Queue: P8 P10 P2 P3 
-I/O Queue: P8 P10 P2 P3 
->>> Context Switch #25
- Running Process: P8 - PID[15634] - Remaining CPU Burst time[13.00] - Remaining I/O Burst time[-3.00]
-
-
-Ready Queue: P10 P2 P3 
-I/O Queue: P10 P2 P3 
->>> Context Switch #26
- Running Process: P10 - PID[15636] - Remaining CPU Burst time[12.00] - Remaining I/O Burst time[-3.00]
-
-
-Ready Queue: P2 P3 P8 
-I/O Queue: P2 P3 P8 
->>> Context Switch #27
- Running Process: P2 - PID[15628] - Remaining CPU Burst time[7.00] - Remaining I/O Burst time[-4.00]
-
-
-Ready Queue: P3 P8 P10 
-I/O Queue: P3 P8 P10 
->>> Context Switch #28
- Running Process: P3 - PID[15629] - Remaining CPU Burst time[3.00] - Remaining I/O Burst time[-4.00]
-
-
-Ready Queue: P8 P10 
-I/O Queue: P8 P10 
->>> Context Switch #29
- Running Process: P8 - PID[15634] - Remaining CPU Burst time[3.00] - Remaining I/O Burst time[-3.00]
-
-
-Ready Queue: P10 
-I/O Queue: P10 
->>> Context Switch #30
- Running Process: P10 - PID[15636] - Remaining CPU Burst time[2.00] - Remaining I/O Burst time[-3.00]
-
-
-Ready Queue: 
-I/O Queue: 
 RUN QUEUE Empty!
 
 
@@ -231,31 +160,31 @@ RUN QUEUE Empty!
 
 PID		Burst Time	Completion Time		Waiting Time
 
-15627		23.00		334.00			311.00
+12261		23.00		23.00			0.00
 
-15628		37.00		397.00			360.00
+12262		37.00		60.00			23.00
 
-15629		33.00		400.00			367.00
+12263		33.00		93.00			60.00
 
-15630		26.00		360.00			334.00
+12264		26.00		119.00			93.00
 
-15631		19.00		279.00			260.00
+12265		19.00		188.00			169.00
 
-15632		12.00		281.00			269.00
+12266		12.00		190.00			178.00
 
-15633		30.00		370.00			340.00
+12267		30.00		230.00			200.00
 
-15634		33.00		403.00			370.00
+12268		33.00		253.00			220.00
 
-15635		10.00		180.00			170.00
+12269		10.00		169.00			159.00
 
-15636		32.00		405.00			373.00
+12270		32.00		255.00			223.00
 
->> Min Completion Time : 180.00
->> MAX Completion Time : 405.00
->> Average Completion Time : 340.90
+>> Min Completion Time : 23.00
+>> MAX Completion Time : 255.00
+>> Average Completion Time : 158.00
 
->> Min Waiting Time : 170.00
->> MAX Waiting Time : 373.00
->> Average Waiting Time : 315.40
+>> Min Waiting Time : 0.00
+>> MAX Waiting Time : 223.00
+>> Average Waiting Time : 132.50
 

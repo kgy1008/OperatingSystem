@@ -30,6 +30,7 @@ typedef struct process {
 
 // PCB structer
 typedef struct pcb {
+    pid_t pid;
     bool flag;
     float burst;
     float io_burst;
@@ -49,32 +50,31 @@ void alarm_handler(int signum) {
 int main() {
     // array for process PID
     PROCESS child[PROCESS_NUM];
+    pid_t parentPID = getpid();  // parent process PID
+    pid_t pid;
     int status;
     int numofSwitching = 0;
 
     printf("Parent Process ID: %d\n", getpid());
     for (int i = 0; i < PROCESS_NUM; i++) {
-        pid_t forkProcess = fork();  // fork child process
+        pid = fork();  // fork child process
 
-        child[i].pid = forkProcess;
+        child[i].pid = pid;
         child[i].cpu_burst = rand() % 30 + 10;
-        child[i].io_burst = rand() % 20 + 1;
+        child[i].io_burst = rand() % 10 + 5;
 
-        if (forkProcess == 0) {  // if Child Process!
+        if (pid == 0) {  // if Child Process!
 
             int key_id;               // message id
             long msgtype = getpid();  // Message type as Child Process ID
-
             float cpu_burst = child[i].cpu_burst;
             float IO_burst = child[i].io_burst;
 
-            // ftok to generate unique key
-            key_t key = ftok("keyfile", 1234);
             MSG msg;                // Message
             msg.msgtype = msgtype;  // Message type as Child PID
 
             // creates a message queue and error handling
-            key_id = msgget(key, IPC_CREAT | 0666);
+            key_id = msgget((key_t)1234, IPC_CREAT | 0666);
 
             if (key_id == -1) {
                 perror("msgget() error!");
@@ -85,33 +85,32 @@ int main() {
             do {
                 // Wait until receiving message from Parent Process
                 if (msgrcv(key_id, &msg, sizeof(PCB), msgtype, 0) != -1) {
-                    // remaining CPU burst time is bigger than QUANTUM
+                    // remaining CPU burst time and I/O burst time are bigger than QUANTUM
                     if (cpu_burst > QUANTUM) {
                         cpu_burst -= QUANTUM;
                         sleep(QUANTUM);
 
-                        msg.pcb.flag = true;  // CPU Burst Time remained
+                        msg.pcb.flag = true;  // CPU Burst Time and I/O Burst Time remained
                         msg.pcb.burst = QUANTUM;
                         msg.pcb.io_burst = IO_burst;
-
+                        msg.pcb.pid = msgtype;
                         // send message to parent
                         msgsnd(key_id, &msg, sizeof(PCB), IPC_NOWAIT);
                     }
 
-                    // remaining CPU burst time is smaller than QUANTUM
+                    // remaining CPU burst time and I/O burst time are smaller than QUANTUM
                     else {
                         cpu_burst = 0;
                         sleep(cpu_burst);
-
-                        msg.pcb.flag = false;  // No CPU Burst Time remaining
+                        msg.pcb.flag = false;  // No CPU Burst Time and I/O Burst Time remaining
                         msg.pcb.burst = cpu_burst;
                         msg.pcb.io_burst = IO_burst;
+                        msg.pcb.pid = msgtype;
 
                         msgsnd(key_id, &msg, sizeof(PCB), IPC_NOWAIT);
                     }
                 }
             } while (cpu_burst > 0);
-
             exit(0);  // child process successful termination
         }
     }
@@ -145,13 +144,11 @@ int main() {
         IO_burst_time[i] = child[i].io_burst;
     }
 
-    // ftok to generate unique key
-    key_t key = ftok("keyfile", 1234);
     int key_id;
     MSG msg;
 
     //  Create Message
-    key_id = msgget(key, IPC_CREAT | 0666);
+    key_id = msgget((key_t)1234, IPC_CREAT | 0666);
     if (key_id == -1) {
         perror("msgget() error!\n");
         exit(1);  // unsuccessful termination
@@ -166,31 +163,23 @@ int main() {
         printf("\n>>> Context Switch #%d\n ", numofSwitching);  // Number of Context Switching
         fprintf(fp, "\n>>> Context Switch #%d\n ", numofSwitching);
 
-        long run = readyQueue.front();  // run status process
-
-        readyQueue.pop_front();  // readyQueue DEQUEUE
-
-        printf("Running Process: P%ld - PID[%d] - Remaining CPU Burst time[%.2lf] - Remaining I/O Burst time[%.2lf]", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
-        fprintf(fp, "Running Process: P%ld - PID[%d] - Remaining CPU Burst time[%.2lf] - Remaining I/O Burst time[%.2lf]", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
-
-        printf("\nReady Queue: ");
-        fprintf(fp, "\nReady Queue: ");
+        printf("Ready Queue: ");
+        fprintf(fp, "Ready Queue: ");
         for (long &i : readyQueue) {
             printf("P%ld ", i + 1);
             fprintf(fp, "P%ld ", i + 1);
         }
 
-        printf("\nI/O Queue: ");
-        fprintf(fp, "\nI/O Queue: ");
-        for (long &i : readyQueue) {
-            fprintf(fp, "P%ld ", i + 1);
-        }
-        printf("\n");
-        fprintf(fp, "\n");
+        long run = readyQueue.front();  // run status process
+        readyQueue.pop_front();         // readyQueue DEQUEUE
+
+        printf("\n Running Process: P%ld - PID[%d] | Remaining CPU Burst time[%.2lf] | Remaining I/O Burst time[%.2lf]\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
+        fprintf(fp, "\n Running Process: P%ld | PID[%d] | Remaining CPU Burst time[%.2lf] | Remaining I/O Burst time[%.2lf]\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
 
         msg.msgtype = child[run].pid;  // msgtype: Child PID
 
         // send message to child
+        msg.msgtype = child[run].pid;
         msgsnd(key_id, &msg, sizeof(PCB), IPC_NOWAIT);
 
         // if message received from child
@@ -208,18 +197,49 @@ int main() {
                 turnaround_time += child[run].cpu_burst;
                 child[run].cpu_burst = 0;
                 completion_time[run] = turnaround_time;
-            }
 
-            // if there's an I/O burst, move the process to the I/O queue
-            if (child[run].io_burst > 0) {
-                io_queue.push_back(run);
-                child[run].io_burst -= QUANTUM;
-                turnaround_time += QUANTUM;
-            }
+                // Send Message to Parent Process to start I/O
+                printf(" ***** [%d] CPU burst reaches to zero, do I/O. *****\n", child[run].pid);
+                fprintf(fp, " ***** [%d] CPU burst reaches to zero, do I/O. *****\n", child[run].pid);
+                msg.msgtype = parentPID;
+                msg.pcb.io_burst = child[run].io_burst;
+                msg.pcb.pid = child[run].pid;
+                msgsnd(key_id, &msg, sizeof(PCB), IPC_NOWAIT);
 
-            // if burst time is over
+                // If Parent Process receives Message
+                if (msgrcv(key_id, &msg, sizeof(PCB), parentPID, 0) != -1) {
+                    // If Current Child Process has I/O burst value
+                    if (msg.pcb.io_burst > 0) {
+                        io_queue.push_back(run);
+                    }
+
+                    // Decrease I/O Burst value & Print Wait Queue
+                    printf(" I/O Queue: ");
+                    fprintf(fp, " I/O Queue: ");
+
+                    for (long &i : io_queue) {                        
+                        printf("P%ld ", i + 1);
+                        fprintf(fp, "P%ld ", i + 1);
+                    }
+
+                    for (auto it = io_queue.begin(); it != io_queue.end();) {
+                        child[*it].io_burst -= QUANTUM;
+
+                        if (child[*it].io_burst <= 0) {
+                            child[*it].io_burst = 0;
+                            printf("\n ***** [%d] I/O burst reaches to zero, end process. *****", child[*it].pid);
+                            fprintf(fp, "\n ***** [%d] I/O burst reaches to zero, end process. *****", child[*it].pid);
+                            it = io_queue.erase(it);
+                        } else {
+                            ++it;
+                        }
+                    }
+                    printf("\n");
+                    fprintf(fp, "\n");
+                }
+            }
             if (child[run].cpu_burst <= 0) {
-                turnaround_time += (child[run].cpu_burst);  /// removed QUANTUM
+                turnaround_time += child[run].cpu_burst;
                 child[run].cpu_burst = 0;
                 completion_time[run] = turnaround_time;
             }
