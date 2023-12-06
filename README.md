@@ -48,7 +48,8 @@ When child process enters running state, 'whether to perform i/o', 'i/o duration
 ## How to Implement
 > For the source code, implementation in C/C++, Building through gcc or g++ compiler in a Linux or Windows WSL (WSL2) environment.  
 
-
+### RR_scheduler  
+`g++ -o main multi_level_queue.cpp` -> `./main`  
 ### Multi-level queue
 `g++ -o main multi_level_queue.cpp` -> `./main`  
 
