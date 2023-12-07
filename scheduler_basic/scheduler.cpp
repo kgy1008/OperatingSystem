@@ -17,7 +17,8 @@
 #include <string>  // for Message queue
 
 #define PROCESS_NUM 10
-#define QUANTUM 10  // time quantum default setting (10ms)
+#define TIMER_TICK_INTERVAL 1
+#define QUANTUM 20                // time quantum default setting (20ms)
 #define IO_BURST_PROBABILITY 0.5  // Set your desired probability here
 
 using namespace std;
@@ -69,6 +70,8 @@ int main() {
 
         child[i].pid = pid;
         child[i].cpu_burst = rand() % 30 + 10;
+        child[i].io_burst = rand() % 20 + 5;
+        /*
         // Determine if I/O burst is created based on the probability
         float random_number = ((float)rand()) / RAND_MAX;
         if (random_number <= IO_BURST_PROBABILITY) {
@@ -83,6 +86,7 @@ int main() {
         } else {
             child[i].io_burst = 0;
         }
+        */
 
         if (pid == 0) {  // if Child Process!
 
@@ -102,13 +106,13 @@ int main() {
                 exit(1);  // unsuccessful termination
             }
 
-           while (true) {
+            while (true) {
                 // Wait until receiving message from Parent Process
                 if (msgrcv(key_id, &msg, sizeof(PCB), msgtype, 0) != -1) {
                     // remaining CPU burst time and I/O burst time are bigger than QUANTUM
                     if (cpu_burst > QUANTUM) {
                         cpu_burst -= QUANTUM;
-                        sleep(QUANTUM);
+                        sleep(TIMER_TICK_INTERVAL);
 
                         msg.pcb.flag = true;  // CPU Burst Time and I/O Burst Time remained
                         msg.pcb.burst = QUANTUM;
