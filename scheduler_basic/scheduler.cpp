@@ -34,6 +34,7 @@ typedef struct process {
     pid_t pid;
     float cpu_burst;
     float io_burst;
+    float random_number;
     std::vector<IO_BURST> io_bursts;  // Vector of I/O bursts
 } PROCESS;
 
@@ -54,6 +55,7 @@ typedef struct msg {
 // Signal handler for SIGALRM
 void alarm_handler(int signum) {
     // Code to execute when the SIGALRM signal is received
+    printf(" Receives ALARM signal\n");
 }
 
 int main() {
@@ -65,16 +67,30 @@ int main() {
     int numofSwitching = 0;
 
     printf("Parent Process ID: %d\n", getpid());
+    // Set up the signal handler for SIGALRM
+    signal(SIGALRM, alarm_handler);
+
+    // Set up the timer
+    struct sigaction sa;
+    struct itimerval timer;
+
+    sa.sa_handler = &alarm_handler;
+    sa.sa_flags = SA_RESTART;
+    sigaction(SIGALRM, &sa, NULL);
+
+    timer.it_value.tv_sec = 10;  // Initial delay
+    timer.it_value.tv_usec = 0;
+    timer.it_interval.tv_sec = 5;  // Interval for subsequent signals
+    timer.it_interval.tv_usec = 0;
+
     for (int i = 0; i < PROCESS_NUM; i++) {
         pid = fork();  // fork child process
 
         child[i].pid = pid;
         child[i].cpu_burst = rand() % 30 + 10;
-        child[i].io_burst = rand() % 20 + 5;
-        /*
         // Determine if I/O burst is created based on the probability
-        float random_number = ((float)rand()) / RAND_MAX;
-        if (random_number <= IO_BURST_PROBABILITY) {
+        child[i].random_number = ((float)rand()) / RAND_MAX;
+        if (child[i].random_number <= IO_BURST_PROBABILITY) {
             child[i].io_burst = rand() % 20 + 5;
             int numIO = rand() % 5;  // Random number of I/O bursts for each process
             for (int j = 0; j < numIO; ++j) {
@@ -86,7 +102,6 @@ int main() {
         } else {
             child[i].io_burst = 0;
         }
-        */
 
         if (pid == 0) {  // if Child Process!
 
@@ -112,6 +127,7 @@ int main() {
                     // remaining CPU burst time and I/O burst time are bigger than QUANTUM
                     if (cpu_burst > QUANTUM) {
                         cpu_burst -= QUANTUM;
+                        setitimer(ITIMER_REAL, &timer, NULL);  // Start the timer
                         sleep(TIMER_TICK_INTERVAL);
 
                         msg.pcb.flag = true;  // CPU Burst Time and I/O Burst Time remained
@@ -197,7 +213,7 @@ int main() {
         long run = readyQueue.front();  // run status process
         readyQueue.pop_front();         // readyQueue DEQUEUE
 
-        printf("\n Running Process: P%ld - PID[%d] | Remaining CPU Burst time[%.2lf] | Remaining I/O Burst time[%.2lf]\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
+        printf("\n Running Process: P%ld | PID[%d] | Remaining CPU Burst time[%.2lf] | Remaining I/O Burst time[%.2lf]\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
         fprintf(fp, "\n Running Process: P%ld | PID[%d] | Remaining CPU Burst time[%.2lf] | Remaining I/O Burst time[%.2lf]\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
 
         msg.msgtype = child[run].pid;  // msgtype: Child PID
@@ -289,23 +305,14 @@ int main() {
 
     // Calculating Min, Max, Sum of Waiting and Completion time
     for (int i = 0; i < PROCESS_NUM; i++) {
-        float waiting_time = completion_time[i] - burst_time[i];
-        if (waiting_time < 0) {
-            burst_time[i] = completion_time[i];
-            waiting_time = 0;
-        }
-
-        printf("%d\t\t%.2lf\t\t%.2lf\t\t\t%.2lf\n\n", child[i].pid, burst_time[i], completion_time[i], waiting_time);
-        fprintf(fp, "%d\t\t%.2lf\t\t%.2lf\t\t\t%.2lf\n\n", child[i].pid, burst_time[i], completion_time[i], waiting_time);
-
+        printf("%d\t\t%.2lf\t\t%.2lf\t\t\t%.2lf\n\n", child[i].pid, burst_time[i], completion_time[i], completion_time[i] - burst_time[i]);
+        fprintf(fp, "%d\t\t%.2lf\t\t%.2lf\t\t\t%.2lf\n\n", child[i].pid, burst_time[i], completion_time[i], completion_time[i] - burst_time[i]);
         sumofCompletiontime += completion_time[i];
-        sumofWaitingtime += waiting_time;
-
+        sumofWaitingtime += (completion_time[i] - burst_time[i]);
         minCompletiontime = min(minCompletiontime, completion_time[i]);
         maxCompletiontime = max(maxCompletiontime, completion_time[i]);
-
-        minWaitingtime = min(minWaitingtime, waiting_time);
-        maxWaitingtime = max(maxWaitingtime, waiting_time);
+        minWaitingtime = min(minWaitingtime, completion_time[i] - burst_time[i]);
+        maxWaitingtime = max(maxWaitingtime, completion_time[i] - burst_time[i]);
     }
 
     // Min, Max, Average Completion time
