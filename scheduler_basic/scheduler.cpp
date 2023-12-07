@@ -18,14 +18,22 @@
 
 #define PROCESS_NUM 10
 #define QUANTUM 10  // time quantum default setting (10ms)
+#define IO_BURST_PROBABILITY 0.5  // Set your desired probability here
 
 using namespace std;
+
+// Define I/O burst structure
+typedef struct io_burst {
+    float start_time;
+    float duration;
+} IO_BURST;
 
 // process(child) structer
 typedef struct process {
     pid_t pid;
     float cpu_burst;
     float io_burst;
+    std::vector<IO_BURST> io_bursts;  // Vector of I/O bursts
 } PROCESS;
 
 // PCB structer
@@ -61,7 +69,20 @@ int main() {
 
         child[i].pid = pid;
         child[i].cpu_burst = rand() % 30 + 10;
-        child[i].io_burst = rand() % 10 + 5;
+        // Determine if I/O burst is created based on the probability
+        float random_number = ((float)rand()) / RAND_MAX;
+        if (random_number <= IO_BURST_PROBABILITY) {
+            child[i].io_burst = rand() % 20 + 5;
+            int numIO = rand() % 5;  // Random number of I/O bursts for each process
+            for (int j = 0; j < numIO; ++j) {
+                IO_BURST io;
+                io.start_time = static_cast<float>(rand() % static_cast<int>(child[i].cpu_burst));
+                io.duration = static_cast<float>(rand() % static_cast<int>(child[i].cpu_burst - io.start_time));
+                child[i].io_bursts.push_back(io);
+            }
+        } else {
+            child[i].io_burst = 0;
+        }
 
         if (pid == 0) {  // if Child Process!
 
@@ -81,8 +102,7 @@ int main() {
                 exit(1);  // unsuccessful termination
             }
 
-            // Child Process Start!
-            do {
+           while (true) {
                 // Wait until receiving message from Parent Process
                 if (msgrcv(key_id, &msg, sizeof(PCB), msgtype, 0) != -1) {
                     // remaining CPU burst time and I/O burst time are bigger than QUANTUM
@@ -106,11 +126,11 @@ int main() {
                         msg.pcb.burst = cpu_burst;
                         msg.pcb.io_burst = IO_burst;
                         msg.pcb.pid = msgtype;
-
                         msgsnd(key_id, &msg, sizeof(PCB), IPC_NOWAIT);
+                        exit(0);  // child process successful termination
                     }
                 }
-            } while (cpu_burst > 0);
+            }
             exit(0);  // child process successful termination
         }
     }
@@ -128,7 +148,7 @@ int main() {
     float turnaround_time = 0;  // turnaround time
 
     printf("\n[Run Status Process ENQUEUE]\n\n");
-    fprintf(fp, "\n[Run Status Process ENQUEUE]\n\n");
+    fprintf(fp, "[Run Status Process ENQUEUE]\n\n");
     for (int i = 0; i < PROCESS_NUM; i++) {
         readyQueue.push_back(i);  // ENQUEUE
 
@@ -137,7 +157,7 @@ int main() {
         printf("I/O Burst Time:    %.2lf\n\n", child[i].io_burst);
 
         fprintf(fp, "< Process #%d | PID: %d >\n", i + 1, child[i].pid);
-        fprintf(fp, "I/O Burst Time:    %.2lf\n", child[i].io_burst);
+        fprintf(fp, "CPU Burst Time:    %.2lf\n", child[i].cpu_burst);
         fprintf(fp, "I/O Burst Time:    %.2lf\n\n", child[i].io_burst);
 
         burst_time[i] = child[i].cpu_burst;
