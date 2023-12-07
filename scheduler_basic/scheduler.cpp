@@ -17,7 +17,7 @@
 #include <string>  // for Message queue
 
 #define PROCESS_NUM 10
-#define TIMER_TICK_INTERVAL 1
+#define TIMER_TICK_INTERVAL 10     // time interval for timer tick (10ms)
 #define QUANTUM 20                // time quantum default setting (20ms)
 #define IO_BURST_PROBABILITY 0.5  // Set your desired probability here
 
@@ -52,15 +52,33 @@ typedef struct msg {
     PCB pcb;       // Message data(PCB) to push in queue
 } MSG;
 
+// array for process PID
+PROCESS child[PROCESS_NUM];
+// Create QUEUE
+std::deque<long> readyQueue;                 // Run QUEUE
+std::deque<long> io_queue;                   // I/O QUEUE
+
 // Signal handler for SIGALRM
 void alarm_handler(int signum) {
-    // Code to execute when the SIGALRM signal is received
-    printf(" Receives ALARM signal\n");
+    for (auto it = io_queue.begin(); it != io_queue.end(); ++it) {
+        long process_index = *it;
+        printf("PID: %d | CPU Burst: %.2f | I/O Burst: %.2f\n", child[process_index].pid, child[process_index].cpu_burst, child[process_index].io_burst);
+    }
+
+    printf("Ready Queue: ");
+    for (long &i : readyQueue) {
+        printf("P%ld ", i + 1);
+    }
+    printf("\n");
+
+    printf("I/O Queue: ");
+    for (long &i : io_queue) {
+        printf("P%ld ", i + 1);
+    }
+    printf("\n");
 }
 
 int main() {
-    // array for process PID
-    PROCESS child[PROCESS_NUM];
     pid_t parentPID = getpid();  // parent process PID
     pid_t pid;
     int status;
@@ -76,11 +94,12 @@ int main() {
 
     sa.sa_handler = &alarm_handler;
     sa.sa_flags = SA_RESTART;
+    sigemptyset(&sa.sa_mask);
     sigaction(SIGALRM, &sa, NULL);
 
-    timer.it_value.tv_sec = 10;  // Initial delay
+    timer.it_value.tv_sec = 5;  // Initial delay
     timer.it_value.tv_usec = 0;
-    timer.it_interval.tv_sec = 5;  // Interval for subsequent signals
+    timer.it_interval.tv_sec = TIMER_TICK_INTERVAL;  // Interval for subsequent signals
     timer.it_interval.tv_usec = 0;
 
     for (int i = 0; i < PROCESS_NUM; i++) {
@@ -127,7 +146,6 @@ int main() {
                     // remaining CPU burst time and I/O burst time are bigger than QUANTUM
                     if (cpu_burst > QUANTUM) {
                         cpu_burst -= QUANTUM;
-                        setitimer(ITIMER_REAL, &timer, NULL);  // Start the timer
                         sleep(TIMER_TICK_INTERVAL);
 
                         msg.pcb.flag = true;  // CPU Burst Time and I/O Burst Time remained
@@ -157,10 +175,6 @@ int main() {
 
     // schedule log file open
     FILE *fp = fopen("schedule_dump.txt", "w");  // write mode (or append mode)
-
-    // Create QUEUE
-    std::deque<long> readyQueue;  // Run QUEUE
-    std::deque<long> io_queue;    // I/O QUEUE
 
     float burst_time[PROCESS_NUM];
     float IO_burst_time[PROCESS_NUM];
@@ -213,8 +227,8 @@ int main() {
         long run = readyQueue.front();  // run status process
         readyQueue.pop_front();         // readyQueue DEQUEUE
 
-        printf("\n Running Process: P%ld | PID[%d] | Remaining CPU Burst time[%.2lf] | Remaining I/O Burst time[%.2lf]\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
-        fprintf(fp, "\n Running Process: P%ld | PID[%d] | Remaining CPU Burst time[%.2lf] | Remaining I/O Burst time[%.2lf]\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
+        printf("\n Running Process: P%ld | PID[%d] | CPU Burst time[%.2lf] | I/O Burst time[%.2lf]\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
+        fprintf(fp, "\n Running Process: P%ld | PID[%d] | CPU Burst time[%.2lf] | I/O Burst time[%.2lf]\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
 
         msg.msgtype = child[run].pid;  // msgtype: Child PID
 
@@ -238,42 +252,44 @@ int main() {
                 child[run].cpu_burst = 0;
                 completion_time[run] = turnaround_time;
 
-                // Send Message to Parent Process to start I/O
-                printf(" ***** [%d] CPU burst reaches to zero, do I/O. *****\n", child[run].pid);
-                fprintf(fp, " ***** [%d] CPU burst reaches to zero, do I/O. *****\n", child[run].pid);
-                msg.msgtype = parentPID;
-                msg.pcb.io_burst = child[run].io_burst;
-                msg.pcb.pid = child[run].pid;
-                msgsnd(key_id, &msg, sizeof(PCB), IPC_NOWAIT);
+                if (child[run].random_number <= IO_BURST_PROBABILITY) {
+                    // Send Message to Parent Process to start I/O
+                    printf(" ***** [%d] CPU burst reaches to zero, do I/O. *****\n", child[run].pid);
+                    fprintf(fp, " ***** [%d] CPU burst reaches to zero, do I/O. *****\n", child[run].pid);
+                    msg.msgtype = parentPID;
+                    msg.pcb.io_burst = child[run].io_burst;
+                    msg.pcb.pid = child[run].pid;
+                    msgsnd(key_id, &msg, sizeof(PCB), IPC_NOWAIT);
 
-                // If Parent Process receives Message
-                if (msgrcv(key_id, &msg, sizeof(PCB), parentPID, 0) != -1) {
-                    // If Current Child Process has I/O burst value
-                    if (msg.pcb.io_burst > 0) {
-                        io_queue.push_back(run);
-                    }
-
-                    for (auto it = io_queue.begin(); it != io_queue.end();) {
-                        child[*it].io_burst -= QUANTUM;
-                        printf(" I/O Queue: ");
-                        fprintf(fp, " I/O Queue: ");
-
-                        for (long &i : io_queue) {
-                            printf("P%ld ", i + 1);
-                            fprintf(fp, "P%ld ", i + 1);
+                    // If Parent Process receives Message
+                    if (msgrcv(key_id, &msg, sizeof(PCB), parentPID, 0) != -1) {
+                        // If Current Child Process has I/O burst value
+                        if (msg.pcb.io_burst > 0) {
+                            io_queue.push_back(run);
                         }
 
-                        if (child[*it].io_burst <= 0) {
-                            child[*it].io_burst = 0;
-                            printf("\n ***** [%d] I/O burst reaches to zero, end process. *****\n", child[*it].pid);
-                            fprintf(fp, "\n ***** [%d] I/O burst reaches to zero, end process. *****\n", child[*it].pid);
-                            it = io_queue.erase(it);
-                        } else {
-                            ++it;
+                        for (auto it = io_queue.begin(); it != io_queue.end();) {
+                            child[*it].io_burst -= QUANTUM;
+                            printf(" I/O Queue: ");
+                            fprintf(fp, " I/O Queue: ");
+
+                            for (long &i : io_queue) {
+                                printf("P%ld ", i + 1);
+                                fprintf(fp, "P%ld ", i + 1);
+                            }
+
+                            if (child[*it].io_burst <= 0) {
+                                child[*it].io_burst = 0;
+                                printf("\n ***** [%d] I/O burst reaches to zero, end process. *****\n", child[*it].pid);
+                                fprintf(fp, "\n ***** [%d] I/O burst reaches to zero, end process. *****\n", child[*it].pid);
+                                it = io_queue.erase(it);
+                            } else {
+                                ++it;
+                            }
                         }
+                        printf("\n");
+                        fprintf(fp, "\n");
                     }
-                    printf("\n");
-                    fprintf(fp, "\n");
                 }
             }
             if (child[run].cpu_burst <= 0) {
