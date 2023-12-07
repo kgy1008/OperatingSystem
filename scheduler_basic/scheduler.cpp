@@ -17,7 +17,6 @@
 #include <string>  // for Message queue
 
 #define PROCESS_NUM 10
-#define TIMER_TICK_INTERVAL 10     // time interval for timer tick (10ms)
 #define QUANTUM 20                // time quantum default setting (20ms)
 #define IO_BURST_PROBABILITY 0.5  // Set your desired probability here
 
@@ -52,55 +51,15 @@ typedef struct msg {
     PCB pcb;       // Message data(PCB) to push in queue
 } MSG;
 
-// array for process PID
-PROCESS child[PROCESS_NUM];
-// Create QUEUE
-std::deque<long> readyQueue;                 // Run QUEUE
-std::deque<long> io_queue;                   // I/O QUEUE
-
-// Signal handler for SIGALRM
-void alarm_handler(int signum) {
-    for (auto it = io_queue.begin(); it != io_queue.end(); ++it) {
-        long process_index = *it;
-        printf("PID: %d | CPU Burst: %.2f | I/O Burst: %.2f\n", child[process_index].pid, child[process_index].cpu_burst, child[process_index].io_burst);
-    }
-
-    printf("Ready Queue: ");
-    for (long &i : readyQueue) {
-        printf("P%ld ", i + 1);
-    }
-    printf("\n");
-
-    printf("I/O Queue: ");
-    for (long &i : io_queue) {
-        printf("P%ld ", i + 1);
-    }
-    printf("\n");
-}
-
 int main() {
+    // array for process PID
+    PROCESS child[PROCESS_NUM];
     pid_t parentPID = getpid();  // parent process PID
     pid_t pid;
     int status;
     int numofSwitching = 0;
 
     printf("Parent Process ID: %d\n", getpid());
-    // Set up the signal handler for SIGALRM
-    signal(SIGALRM, alarm_handler);
-
-    // Set up the timer
-    struct sigaction sa;
-    struct itimerval timer;
-
-    sa.sa_handler = &alarm_handler;
-    sa.sa_flags = SA_RESTART;
-    sigemptyset(&sa.sa_mask);
-    sigaction(SIGALRM, &sa, NULL);
-
-    timer.it_value.tv_sec = 5;  // Initial delay
-    timer.it_value.tv_usec = 0;
-    timer.it_interval.tv_sec = TIMER_TICK_INTERVAL;  // Interval for subsequent signals
-    timer.it_interval.tv_usec = 0;
 
     for (int i = 0; i < PROCESS_NUM; i++) {
         pid = fork();  // fork child process
@@ -140,14 +99,14 @@ int main() {
                 exit(1);  // unsuccessful termination
             }
 
-            while (true) {
+            // Child Process Start!
+            do {
                 // Wait until receiving message from Parent Process
                 if (msgrcv(key_id, &msg, sizeof(PCB), msgtype, 0) != -1) {
                     // remaining CPU burst time and I/O burst time are bigger than QUANTUM
                     if (cpu_burst > QUANTUM) {
                         cpu_burst -= QUANTUM;
-                        sleep(TIMER_TICK_INTERVAL);
-
+                        sleep(QUANTUM);
                         msg.pcb.flag = true;  // CPU Burst Time and I/O Burst Time remained
                         msg.pcb.burst = QUANTUM;
                         msg.pcb.io_burst = IO_burst;
@@ -155,7 +114,6 @@ int main() {
                         // send message to parent
                         msgsnd(key_id, &msg, sizeof(PCB), IPC_NOWAIT);
                     }
-
                     // remaining CPU burst time and I/O burst time are smaller than QUANTUM
                     else {
                         cpu_burst = 0;
@@ -165,16 +123,18 @@ int main() {
                         msg.pcb.io_burst = IO_burst;
                         msg.pcb.pid = msgtype;
                         msgsnd(key_id, &msg, sizeof(PCB), IPC_NOWAIT);
-                        exit(0);  // child process successful termination
                     }
                 }
-            }
+            } while (cpu_burst > 0);
             exit(0);  // child process successful termination
         }
     }
 
     // schedule log file open
     FILE *fp = fopen("schedule_dump.txt", "w");  // write mode (or append mode)
+    // Create QUEUE
+    std::deque<long> readyQueue;  // Run QUEUE
+    std::deque<long> io_queue;    // I/O QUEUE
 
     float burst_time[PROCESS_NUM];
     float IO_burst_time[PROCESS_NUM];
