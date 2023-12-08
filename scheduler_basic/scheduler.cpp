@@ -58,8 +58,11 @@ int main() {
     pid_t pid;
     int status;
     int numofSwitching = 0;
+    // schedule log file open
+    FILE *fp = fopen("schedule_dump.txt", "w");  // write mode (or append mode)
 
     printf("Parent Process ID: %d\n", getpid());
+    fprintf(fp, "Parent Process ID: %d\n", getpid());
 
     for (int i = 0; i < PROCESS_NUM; i++) {
         pid = fork();  // fork child process
@@ -130,8 +133,6 @@ int main() {
         }
     }
 
-    // schedule log file open
-    FILE *fp = fopen("schedule_dump.txt", "w");  // write mode (or append mode)
     // Create QUEUE
     std::deque<long> readyQueue;  // Run QUEUE
     std::deque<long> io_queue;    // I/O QUEUE
@@ -187,8 +188,10 @@ int main() {
         long run = readyQueue.front();  // run status process
         readyQueue.pop_front();         // readyQueue DEQUEUE
 
-        printf("\n Running Process: P%ld | PID[%d] | CPU Burst time[%.2lf] | I/O Burst time[%.2lf]\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
-        fprintf(fp, "\n Running Process: P%ld | PID[%d] | CPU Burst time[%.2lf] | I/O Burst time[%.2lf]\n", run + 1, child[run].pid, child[run].cpu_burst, child[run].io_burst);
+        printf("\n Running Process: P%ld | PID[%d] | Remaining CPU Burst time[%.2lf] (-> %.0f) | Remaining I/O Burst time[%.2lf] (-> %.0f)\n", run + 1, child[run].pid, child[run].cpu_burst,
+               (child[run].cpu_burst - QUANTUM >= 0) ? child[run].cpu_burst - QUANTUM : 0, child[run].io_burst, (child[run].io_burst - QUANTUM >= 0) ? child[run].io_burst - QUANTUM : 0);
+        fprintf(fp, "\n Running Process: P%ld | PID[%d] | Remaining CPU Burst time[%.2lf] (-> %.0f) | Remaining I/O Burst time[%.2lf] (-> %.0f)\n", run + 1, child[run].pid, child[run].cpu_burst,
+                (child[run].cpu_burst - QUANTUM >= 0) ? child[run].cpu_burst - QUANTUM : 0, child[run].io_burst, (child[run].io_burst - QUANTUM >= 0) ? child[run].io_burst - QUANTUM : 0);
 
         msg.msgtype = child[run].pid;  // msgtype: Child PID
 
@@ -263,8 +266,8 @@ int main() {
     msgsnd(key_id, &msg, sizeof(PCB), IPC_NOWAIT);  // sending last message to child process
     wait(&status);                                  // wait for all the child process to terminate
 
-    printf("\nRUN QUEUE Empty!\n");
-    fprintf(fp, "\nRUN QUEUE Empty!\n");
+    printf("\n RUN QUEUE Empty!\n");
+    fprintf(fp, "\n RUN QUEUE Empty!\n");
 
     float sumofCompletiontime = 0.0;
     float sumofWaitingtime = 0.0;
