@@ -59,10 +59,8 @@ int main() {
     int status;
     int numofSwitching = 0;
     // schedule log file open
-    FILE *fp = fopen("schedule_dump.txt", "w");  // write mode (or append mode)
 
     printf("Parent Process ID: %d\n", getpid());
-    fprintf(fp, "Parent Process ID: %d\n", getpid());
 
     for (int i = 0; i < PROCESS_NUM; i++) {
         pid = fork();  // fork child process
@@ -132,6 +130,8 @@ int main() {
             exit(0);  // child process successful termination
         }
     }
+
+    FILE *fp = fopen("schedule_dump.txt", "w");  // write mode (or append mode)
 
     // Create QUEUE
     std::deque<long> readyQueue;  // Run QUEUE
