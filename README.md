@@ -1,6 +1,7 @@
 # OperatingSystem
 ## 2023 Operating System Term project
-Implement a simulator for RR scheduling, including the ready queue and I/O queue. (The parent process acts as the scheduler)
+- Implement a simulator for RR scheduling, including the ready queue and I/O queue.   
+- The parent process acts as the scheduler
 ***
 ### 1. About Round-Robin CPU Scheduling
 Round Robin (RR) scheduling algorithm is designed specifically for time-sharing systems. It is a preemptive version of first-come, first-served scheduling. Processes are dispatched in a first-in-first-out sequence, but each process can run for only a limited amount of time. This time interval is known as a time-slice or quantum. It is similar to FIFO scheduling, but preemption added to switches between processes.
@@ -31,7 +32,7 @@ Round Robin (RR) scheduling algorithm is designed specifically for time-sharing 
       - When 'start time of I/O' occurs, the next child process in the ready queue executes.  
       - Information about the i/o is sent to the parent process via IPC.  
     - There is a option for creating I/O burst time:  
-When child process enters running state, 'whether to perform i/o', 'i/o duration', and 'i/o start time' are randomly determined for the process. When the i/o start time is reached, the process must enter the i/o queue, and the parent process immediately dispatches another process from the ready queue.  
+When the process is created, i/o start times and each i/o duration are randomly allocated as CPU burst time is allocated. (pre-defining 'total CPU burst time', 'i/o execution from time x1 to y2, 'i/o execution from time x2 to y2, …)
   - If the CPU burst time of a child process ends before the time quantum, an IPC message is sent to the parent.  
 - **Logging**:  
   - The following contents are output for every time tick t:  
