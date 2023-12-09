@@ -52,7 +52,7 @@ int main() {
         pid_t forkProcess = fork();  // fork child process
 
         child[i].pid = forkProcess;
-        child[i].cpu_burst = rand() % 20 + 1;  // for process CPU burst: 1 ~ 20
+        child[i].cpu_burst = rand() % 30 + 10;  
 
         /// if interactive process
         if (interactive[i] == true) {

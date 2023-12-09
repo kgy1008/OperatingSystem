@@ -1,94 +1,114 @@
 
 [Run Status Process ENQUEUE]
 
-PID: 	3649
+PID: 	1128
 Arrival Order: 	1
-Burst Time: 	4.00
+Burst Time: 	23.00
 
 Priority: 	2
 
-PID: 	3650
+PID: 	1129
 Arrival Order: 	2
-Burst Time: 	7.00
+Burst Time: 	26.00
 
 Priority: 	2
 
-PID: 	3651
+PID: 	1130
 Arrival Order: 	3
-Burst Time: 	18.00
+Burst Time: 	37.00
 
 Priority: 	2
 
-PID: 	3652
+PID: 	1131
 Arrival Order: 	4
-Burst Time: 	16.00
+Burst Time: 	35.00
 
 Priority: 	1
 
-PID: 	3653
+PID: 	1132
 Arrival Order: 	5
-Burst Time: 	14.00
+Burst Time: 	33.00
 
 Priority: 	1
 
-PID: 	3654
+PID: 	1133
 Arrival Order: 	6
-Burst Time: 	16.00
+Burst Time: 	35.00
 
 Priority: 	2
 
-PID: 	3655
+PID: 	1134
 Arrival Order: 	7
-Burst Time: 	7.00
+Burst Time: 	26.00
 
 Priority: 	2
 
-PID: 	3656
+PID: 	1135
 Arrival Order: 	8
-Burst Time: 	13.00
+Burst Time: 	22.00
 
 Priority: 	2
 
-PID: 	3657
+PID: 	1136
 Arrival Order: 	9
-Burst Time: 	10.00
+Burst Time: 	19.00
 
 Priority: 	2
 
-PID: 	3658
+PID: 	1137
 Arrival Order: 	10
-Burst Time: 	2.00
+Burst Time: 	11.00
 
 Priority: 	2
 
 
 [Process Execution Flow]
 
->>> Context Switch #1 -> Running Process: P1 - PID[3649] - Burst time[4.00]
+>>> Context Switch #1 -> Running Process: P1 - PID[1128] - Burst time[23.00]
 
->>> Context Switch #2 -> Running Process: P2 - PID[3650] - Burst time[7.00]
+>>> Context Switch #2 -> Running Process: P2 - PID[1129] - Burst time[26.00]
 
->>> Context Switch #3 -> Running Process: P3 - PID[3651] - Burst time[18.00]
+>>> Context Switch #3 -> Running Process: P3 - PID[1130] - Burst time[37.00]
 
->>> Context Switch #4 -> Running Process: P4 - PID[3652] - Burst time[16.00]
+>>> Context Switch #4 -> Running Process: P4 - PID[1131] - Burst time[35.00]
 
->>> Context Switch #5 -> Running Process: P5 - PID[3653] - Burst time[14.00]
+>>> Context Switch #5 -> Running Process: P5 - PID[1132] - Burst time[33.00]
 
->>> Context Switch #6 -> Running Process: P6 - PID[3654] - Burst time[16.00]
+>>> Context Switch #6 -> Running Process: P6 - PID[1133] - Burst time[35.00]
 
->>> Context Switch #7 -> Running Process: P7 - PID[3655] - Burst time[7.00]
+>>> Context Switch #7 -> Running Process: P7 - PID[1134] - Burst time[26.00]
 
->>> Context Switch #8 -> Running Process: P8 - PID[3656] - Burst time[13.00]
+>>> Context Switch #8 -> Running Process: P8 - PID[1135] - Burst time[22.00]
 
->>> Context Switch #9 -> Running Process: P9 - PID[3657] - Burst time[10.00]
+>>> Context Switch #9 -> Running Process: P9 - PID[1136] - Burst time[19.00]
 
->>> Context Switch #10 -> Running Process: P10 - PID[3658] - Burst time[2.00]
+>>> Context Switch #10 -> Running Process: P10 - PID[1137] - Burst time[11.00]
 
->>> Context Switch #11 -> Running Process: P1 - PID[3649] - Burst time[4.00]
+>>> Context Switch #11 -> Running Process: P1 - PID[1128] - Burst time[23.00]
 
->>> Context Switch #12 -> Running Process: P2 - PID[3650] - Burst time[7.00]
+>>> Context Switch #12 -> Running Process: P2 - PID[1129] - Burst time[26.00]
 
->>> Context Switch #13 -> Running Process: P3 - PID[3651] - Burst time[18.00]
+>>> Context Switch #13 -> Running Process: P3 - PID[1130] - Burst time[37.00]
+
+>>> Context Switch #14 -> Running Process: P4 - PID[1131] - Burst time[15.00]
+
+>>> Context Switch #15 -> Running Process: P5 - PID[1132] - Burst time[13.00]
+
+>>> Context Switch #16 -> Running Process: P6 - PID[1133] - Burst time[35.00]
+
+>>> Context Switch #17 -> Running Process: P7 - PID[1134] - Burst time[26.00]
+
+>>> Context Switch #18 -> Running Process: P8 - PID[1135] - Burst time[22.00]
+
+>>> Context Switch #19 -> Running Process: P9 - PID[1136] - Burst time[19.00]
+
+>>> Context Switch #20 -> Running Process: P10 - PID[1137] - Burst time[11.00]
+
+>>> Context Switch #21 -> Running Process: P1 - PID[1128] - Burst time[23.00]
+
+>>> Context Switch #22 -> Running Process: P2 - PID[1129] - Burst time[26.00]
+
+>>> Context Switch #23 -> Running Process: P3 - PID[1130] - Burst time[37.00]
 
 RUN QUEUE Empty!
 
@@ -97,31 +117,31 @@ RUN QUEUE Empty!
 
 PID		Burst Time	Completion Time		Waiting Time	Priority
 
-3649		4.00		82.00			78.00			2
+1128		23.00		204.00			181.00			2
 
-3650		7.00		89.00			82.00			2
+1129		26.00		230.00			204.00			2
 
-3651		18.00		107.00			89.00			2
+1130		37.00		267.00			230.00			2
 
-3652		16.00		16.00			0.00			1
+1131		35.00		55.00			20.00			1
 
-3653		14.00		30.00			16.00			1
+1132		33.00		68.00			35.00			1
 
-3654		16.00		46.00			30.00			2
+1133		35.00		103.00			68.00			2
 
-3655		7.00		53.00			46.00			2
+1134		26.00		129.00			103.00			2
 
-3656		13.00		66.00			53.00			2
+1135		22.00		151.00			129.00			2
 
-3657		10.00		76.00			66.00			2
+1136		19.00		170.00			151.00			2
 
-3658		2.00		78.00			76.00			2
+1137		11.00		181.00			170.00			2
 
->> Min Completion Time : 16.00
->> MAX Completion Time : 107.00
->> Average Completion Time : 64.30
+>> Min Completion Time : 55.00
+>> MAX Completion Time : 267.00
+>> Average Completion Time : 155.80
 
->> Min Waiting Time : 0.00
->> MAX Waiting Time : 89.00
->> Average Waiting Time : 53.60
+>> Min Waiting Time : 20.00
+>> MAX Waiting Time : 230.00
+>> Average Waiting Time : 129.10
 
